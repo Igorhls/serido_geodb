@@ -1,0 +1,19 @@
+version: '3.1'
+services:
+  # Serviço do Banco de Dados Geoespacial
+  postgis:
+    image: postgis/postgis:latest # Imagem oficial mais recente do PostGIS
+    container_name: serido_geodb
+    restart: always
+    environment:
+      POSTGRES_USER: igorhls
+      POSTGRES_PASSWORD: 28114075 # Troque por uma senha forte
+      POSTGRES_DB: serido_renovavel
+    volumes:
+      # Mantém os dados persistentes mesmo se o container for parado/removido
+      - serido_data:/var/lib/postgresql/data
+    ports:
+      - "0.0.0.0:5432:5432" # Mapeia a porta do container para a sua máquina local
+
+volumes:
+  serido_data:
