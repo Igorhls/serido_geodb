@@ -18,7 +18,7 @@ O objetivo é organizar e disponibilizar gratuitamente dados atualizados e padro
 
 ## 🧑‍💻 Equipe
 
-* **Pesquisadores (Bolsista):** Maria Luiza e Igor Henrique
+* **Pesquisadores (Bolsistas):** Maria Luiza e Igor Henrique
 * **Orientador:** Flánelson Monteiro
 *  **Grupo de Pesquisa:** Processamento Mineral
 * **Instituição:** Instituto Federal de Educação, Ciência e Tecnologia do Rio Grande do Norte (IFRN)
