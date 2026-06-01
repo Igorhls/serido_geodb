@@ -1,4 +1,5 @@
 version: '3.1'
+
 services:
   # Serviço do Banco de Dados Geoespacial
   postgis:
@@ -14,6 +15,21 @@ services:
       - serido_data:/var/lib/postgresql/data
     ports:
       - "0.0.0.0:5432:5432" # Mapeia a porta do container para a sua máquina local
+
+  # NOVO: Serviço do Servidor Web (GeoDjango)
+# NOVO: Serviço do Servidor Web (GeoDjango)
+  web:
+    build: ../WEBGIS          # Alterado de ./ para ../
+    container_name: serido_django
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ../WEBGIS:/app        # Alterado de ./ para ../
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgis
+    env_file:
+      - .env
 
 volumes:
   serido_data:

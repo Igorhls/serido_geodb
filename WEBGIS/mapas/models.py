@@ -1,0 +1,29 @@
+from django.contrib.gis.db import models
+
+# Tabela de Eólicas (Pontos)
+class EmpreendimentoEolico(models.Model):
+    nome_parque = models.CharField(max_length=255, null=True, blank=True)
+    status_operacional = models.CharField(max_length=100, null=True, blank=True)
+    capacidade_mw = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    data_operacao = models.DateField(null=True, blank=True)
+    fonte_dado = models.CharField(max_length=100, null=True, blank=True)
+    
+    # O campo mágico espacial! (Ponto com SRC UTM 24S)
+    geom = models.PointField(srid=31984)
+
+    def __str__(self):
+        return self.nome_parque or "Parque Eólico (Sem nome)"
+
+# Tabela de Solares (Polígonos)
+class EmpreendimentoSolar(models.Model):
+    nome_usina = models.CharField(max_length=255, null=True, blank=True)
+    status_operacional = models.CharField(max_length=100, null=True, blank=True)
+    capacidade_mw = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    data_operacao = models.DateField(null=True, blank=True)
+    fonte_dado = models.CharField(max_length=100, null=True, blank=True)
+    
+    # O campo mágico espacial! (Polígono com SRC UTM 24S)
+    geom = models.PolygonField(srid=31984)
+
+    def __str__(self):
+        return self.nome_usina or "Usina Solar (Sem nome)"
