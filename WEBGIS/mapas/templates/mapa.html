@@ -1,0 +1,141 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Geobdg | Eólicas do Seridó</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#inicio" aria-label="Geobdg início">Geobdg</a>
+      <nav class="menu" aria-label="Navegação principal">
+        <a href="#banco">Banco de dados</a>
+        <a href="#quem-somos">Quem Somos</a>
+        <a href="#contato">Contato</a>
+      </nav>
+    </header>
+
+    <main id="inicio">
+      <section class="hero" aria-labelledby="titulo-principal">
+        <div class="map-grid" aria-hidden="true"></div>
+
+        <div class="hero-copy">
+          <p class="eyebrow">Atlas geográfico experimental</p>
+          <h1 id="titulo-principal">Eólicas do Seridó em dados vivos</h1>
+          <p>
+            Um provedor geográfico para consultar municípios, torres,
+            usinas, acessos e camadas territoriais da energia dos ventos no
+            Rio Grande do Norte.
+          </p>
+          <div class="hero-actions" aria-label="Ações principais">
+            <a href="#banco">Explorar camadas</a>
+            <a href="#quem-somos">Ver conceito</a>
+          </div>
+        </div>
+
+        <div class="rn-stage" aria-label="Mapa interativo do Seridó">
+          
+          <div id="meu-mapa" style="height: 100%; width: 100%; min-height: 450px; border-radius: 12px; z-index: 1; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+          
+        </div>
+
+        <aside class="stats" aria-label="Resumo do banco geográfico">
+          <div>
+            <span>Seridó</span>
+            <strong>{{ total_eolicas }}</strong>
+            <small>torres cadastradas</small>
+          </div>
+          <div>
+            <span>Municípios</span>
+            <strong>16</strong>
+            <small>áreas interativas no protótipo</small>
+          </div>
+          <div>
+            <span>Energia</span>
+            <strong>vento</strong>
+            <small>base aberta para análise espacial</small>
+          </div>
+        </aside>
+
+        <div class="wind-mark" aria-hidden="true">
+          <span></span>
+        </div>
+      </section>
+
+      <section id="banco" class="data-section">
+        <div>
+          <p class="eyebrow">Banco de dados</p>
+          <h2>Camadas prontas para explorar o território</h2>
+        </div>
+        <div class="data-grid">
+          <article>
+            <span>01</span>
+            <h3>Usinas e aerogeradores</h3>
+            <p>Localização, potência estimada, município e situação operacional.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Municípios do Seridó</h3>
+            <p>Consulta espacial por área, nome, microrregião e relação com parques eólicos.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Infraestrutura</h3>
+            <p>Linhas de transmissão, vias de acesso e pontos de apoio para análise técnica.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="quem-somos" class="about-section">
+        <p class="eyebrow">Quem somos</p>
+        <h2>Geobdg conecta energia, mapa e decisão pública.</h2>
+        <p>
+          Este protótipo demonstra uma plataforma geográfica para organizar
+          informações de parques eólicos do Seridó em uma experiência simples,
+          visual e acessível.
+        </p>
+      </section>
+
+      <section id="contato" class="contact-section">
+        <p class="eyebrow">Contato</p>
+        <h2>Dados para pesquisa, gestão e transparência.</h2>
+        <a href="mailto:contato@geobdg.local">contato@geobdg.local</a>
+      </section>
+    </main>
+
+    <script src="{% static 'script.js' %}"></script>
+    
+    <script>
+        // 1. Cria o mapa e centraliza no Rio Grande do Norte
+        var map = L.map('meu-mapa').setView([-5.7944, -36.6], 7);
+
+        // 2. Coloca a imagem de fundo (Mapa de ruas padrão do OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 3. Recebe os dados geoespaciais enviados pelo Django
+        var geojsonData = {{ eolicas_geojson|safe }};
+
+        // 4. Plota as eólicas no mapa
+        L.geoJSON(geojsonData, {
+            onEachFeature: function (feature, layer) {
+                if (feature.properties && feature.properties.nome_parque) {
+                    layer.bindPopup("<b>Parque Eólico:</b> " + feature.properties.nome_parque);
+                }
+            }
+        }).addTo(map);
+    </script>
+  </body>
+</html>

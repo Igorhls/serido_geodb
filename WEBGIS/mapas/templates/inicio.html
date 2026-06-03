@@ -1,0 +1,196 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Geobdg | Eólicas do Seridó</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+    
+    <style>
+      /* Estilos para o mapa da tela inicial parecer um desenho solto */
+      #mapa-ibge {
+        background: transparent !important;
+        cursor: pointer;
+        /* Evita cliques nos controles invisíveis do Leaflet */
+        pointer-events: none; 
+      }
+      /* Ativa cliques apenas nas formas dos municípios que vamos desenhar */
+      .leaflet-interactive { pointer-events: auto; }
+      
+      .leaflet-control-container { display: none; }
+      
+      /* Animação da Torre Eólica Decorativa */
+      @keyframes girarHelice {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .helice {
+        transform-origin: 25px 25px;
+        animation: girarHelice 4s linear infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#inicio">Geobdg</a>
+      <nav class="menu">
+        <a href="#banco">Banco de dados</a>
+        <a href="#quem-somos">Quem Somos</a>
+        <a href="#contato">Contato</a>
+      </nav>
+    </header>
+
+    <main id="inicio">
+      <section class="hero" style="position: relative; padding-bottom: 20px;">
+        <div class="hero-copy">
+          <p class="eyebrow">Atlas geográfico experimental</p>
+          <h1 id="titulo-principal">Eólicas do Seridó em dados vivos</h1>
+          <p>Um provedor geográfico para consultar municípios, torres, usinas, acessos e camadas territoriais da energia dos ventos no RN.</p>
+          <div class="hero-actions">
+            <a href="{% url 'pagina_mapa' %}">Abrir Mapa Interativo</a>
+            <a href="#quem-somos">Ver conceito</a>
+          </div>
+        </div>
+
+        <div class="rn-stage" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 40px;">
+          
+          <div id="mapa-ibge" style="height: 560px; width: 100%; z-index: 1;" title="Clique em um município para abrir o WebGIS"></div>
+          
+          <div style="margin-top: -15px; font-weight: 800; color: #64748b; font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase; z-index: 2;">
+            👆 Clique no mapa para abrir o WebGIS interativo
+          </div>
+        </div>
+
+        <aside class="stats" style="position: relative; z-index: 20; display: flex; justify-content: center; gap: 20px; margin-bottom: 30px;">
+          <div style="background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: center; min-width: 160px;">
+            <span style="color: #64748b;">Seridó</span>
+            <strong style="display: block; font-size: 2.5rem; color: #0f172a;">{{ total_eolicas }}</strong>
+            <small style="color: #64748b;">torres cadastradas</small>
+          </div>
+          <div style="background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: center; min-width: 160px;">
+            <span style="color: #64748b;">Municípios</span>
+            <strong id="contador-municipios" style="display: block; font-size: 2.5rem; color: #0f172a;">-- / 167</strong>
+            <small style="color: #64748b;">com torres no banco de dados</small>
+          </div>
+          <div style="background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: center; min-width: 160px;">
+            <span style="color: #64748b;">Cobertura</span>
+            <strong style="display: block; font-size: 2.5rem; color: #0f172a;">RN</strong>
+            <small style="color: #64748b;">Foco espacial do projeto</small>
+          </div>
+        </aside>
+
+        <div style="position: absolute; bottom: 80px; right: 10%; z-index: 10; transform: scale(1.8); transform-origin: bottom right; pointer-events: none;">
+          <svg width="50" height="80" viewBox="0 0 50 80">
+            <path d="M 23 25 L 20 80 L 30 80 L 27 25 Z" fill="#94a3b8" />
+            <g class="helice">
+              <path d="M 25 25 L 23 5 L 27 5 Z" fill="#334155" />
+              <path d="M 25 25 L 42 35 L 38 38 Z" fill="#334155" />
+              <path d="M 25 25 L 8 35 L 12 38 Z" fill="#334155" />
+              <circle cx="25" cy="25" r="3" fill="#0ea5e9" />
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <section id="banco" class="data-section">
+        <div><p class="eyebrow">Banco de dados</p><h2>Camadas prontas para explorar o território</h2></div>
+        <div class="data-grid">
+          <article><span>01</span><h3>Usinas e aerogeradores</h3><p>Localização, potência estimada, município e situação operacional.</p></article>
+          <article><span>02</span><h3>Municípios do Seridó</h3><p>Consulta espacial por área, nome, microrregião e relação com parques eólicos.</p></article>
+          <article><span>03</span><h3>Infraestrutura</h3><p>Linhas de transmissão, vias de acesso e pontos de apoio para análise técnica.</p></article>
+        </div>
+      </section>
+      <section id="quem-somos" class="about-section">
+        <p class="eyebrow">Quem somos</p><h2>Geobdg conecta energia, mapa e decisão pública.</h2>
+        <p>Este protótipo demonstra uma plataforma geográfica para organizar informações de parques eólicos do Seridó em uma experiência simples, visual e acessível.</p>
+      </section>
+      <section id="contato" class="contact-section">
+        <p class="eyebrow">Contato</p><h2>Dados para pesquisa, gestão e transparência.</h2>
+        <a href="mailto:contato@geobdg.local">contato@geobdg.local</a>
+      </section>
+    </main>
+
+    <script src="{% static 'script.js' %}"></script>
+    
+    <script>
+      // Inicia o mapa com Zoom 7.8 (Enquadramento Perfeito do RN Elefante)
+      var mapIbge = L.map('mapa-ibge', { zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, attributionControl: false }).setView([-6.0, -36.6], 7.8);
+      
+      var coresTema = ['#0ea5e9', '#f97316', '#8b5cf6', '#10b981', '#eab308', '#3b82f6'];
+      var contadorUI = document.getElementById('contador-municipios');
+      
+      // 1. Recebendo as Torres do seu banco de dados de forma segura
+      var jsonStr = '{{ eolicas_geojson|escapejs }}';
+      var dadosEolicas = { features: [] };
+      try {
+          if (jsonStr) dadosEolicas = JSON.parse(jsonStr);
+      } catch (e) {
+          console.error("Aviso: Nenhum dado de eólica recebido do banco.");
+      }
+      var pontosTurf = dadosEolicas.features || [];
+      var municipiosAtivosCount = 0;
+
+      // 2. Usando um servidor GitHub (CDN) super rápido e estável
+      var urlMapaRN = 'https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-24-mun.json';
+
+      fetch(urlMapaRN)
+        .then(response => {
+            if (!response.ok) throw new Error("Falha na rede");
+            return response.json();
+        })
+        .then(malhaRN => {
+            var geojsonLayer = L.geoJSON(malhaRN, {
+                style: function (feature) {
+                    var temTorre = false;
+                    
+                    // 3. Cruzamento Espacial VIVO: A torre tá dentro do município?
+                    if (pontosTurf.length > 0 && feature.geometry) {
+                        for (var i = 0; i < pontosTurf.length; i++) {
+                            try {
+                                if (turf.booleanPointInPolygon(pontosTurf[i], feature)) {
+                                    temTorre = true;
+                                    break;
+                                }
+                            } catch(err) {}
+                        }
+                    }
+
+                    if (temTorre) {
+                        municipiosAtivosCount++;
+                        var idMunicipio = parseInt(feature.properties.id || 0);
+                        var corEscolhida = coresTema[idMunicipio % coresTema.length];
+                        return { fillColor: corEscolhida, weight: 1.5, opacity: 1, color: '#ffffff', fillOpacity: 0.9 };
+                    } else {
+                        // CINZA DESTACADO (Sólido e Metálico)
+                        return { fillColor: '#94a3b8', weight: 1.5, opacity: 1, color: '#ffffff', fillOpacity: 0.7 };
+                    }
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.on({
+                        mouseover: function (e) {
+                            var target = e.target;
+                            target.setStyle({ weight: 3, color: '#334155', fillOpacity: 1 });
+                            target.bringToFront();
+                        },
+                        mouseout: function (e) { geojsonLayer.resetStyle(e.target); },
+                        click: function () { window.location.href = "{% url 'pagina_mapa' %}"; }
+                    });
+                }
+            }).addTo(mapIbge);
+
+            // 4. Injeta a matemática resolvida no seu contador
+            contadorUI.innerHTML = `<span style="color: #0ea5e9;">${municipiosAtivosCount}</span> / 167`;
+        })
+        .catch(err => {
+            console.error("Erro fatal ao carregar o mapa do RN:", err);
+            document.getElementById('mapa-ibge').innerHTML = '<p style="text-align:center; padding-top:150px; color:#ef4444; font-weight:bold;">Verifique a conexão de internet e recarregue a página (F5).</p>';
+        });
+    </script>
+  </body>
+</html>
