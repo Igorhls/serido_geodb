@@ -39,3 +39,25 @@ Para realizar o backup do banco de dados espacial localizado no Docker de forma 
 
 Os backups serão salvos no formato compactado do PostgreSQL (`.dump`) dentro do diretório `PostGIS/backups/`.
 
+## 🌐 API de Dados Espaciais (WebGIS -> QGIS)
+
+O projeto possui um endpoint (ponto de acesso) que extrai os dados vivos do banco de dados PostGIS e os converte automaticamente para o formato **GeoJSON**. Isso permite que softwares de SIG desktop (como o QGIS) consumam a base geométrica em tempo real via internet, sem necessidade de conexões diretas ao banco de dados.
+
+### 📌 Endpoint Principal
+* **URL Local:** `http://localhost:8000/mapas/api/eolicas/`
+* **Método HTTP:** `GET`
+* **Formato de Saída:** `application/json` (GeoJSON nativo)
+
+---
+
+### 🗺️ Como Consumir a API no QGIS (Passo a Passo)
+
+Para carregar a camada vetorial das torres eólicas diretamente no QGIS utilizando este link, siga as instruções abaixo:
+
+1. Abra o **QGIS**.
+2. No menu superior, navegue em: **Camada** -> **Adicionar Camada** -> **Adicionar Camada Vetorial...** (ou use o atalho `Ctrl + Shift + V`).
+3. Na janela que se abrir, mude a opção **Tipo de fonte** de *Arquivo* para **Protocolo: HTTP(S), cloud, etc.**
+4. No campo **URI**, cole o link da API:
+   ```text
+   http://localhost:8000/mapas/api/eolicas/
+
