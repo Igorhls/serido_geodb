@@ -3,8 +3,9 @@ import zipfile
 import tempfile
 import shutil
 import json
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
+from django.contrib import messages
 from django.contrib.gis.gdal import DataSource
 from django.core.serializers import serialize
 from django.contrib.admin.views.decorators import staff_member_required
@@ -22,13 +23,13 @@ def upload_shapefile(request):
         request (HttpRequest): O objeto de requisição do Django contendo o arquivo ZIP.
 
     Retorna:
-        HttpResponse: Uma resposta textual indicando o sucesso da operação,
-                      um erro encontrado ou renderizando a página de upload.
+        HttpResponse: Uma resposta redirecionando com mensagens ou renderizando a página de upload.
     """
     if request.method == 'POST':
         arquivo_zip = request.FILES.get('arquivo_zip')
         if not arquivo_zip:
-            return HttpResponse("Nenhum arquivo enviado.")
+            messages.error(request, "Nenhum arquivo enviado.")
+            return render(request, 'upload.html')
 
         # Criação de um diretório temporário isolado para extração
         temp_dir = tempfile.mkdtemp()
@@ -52,7 +53,8 @@ def upload_shapefile(request):
                     break
 
             if not shp_file:
-                return HttpResponse("Erro: Não encontrei nenhum arquivo .shp.")
+                messages.error(request, "Erro: Não encontrei nenhum arquivo .shp.")
+                return render(request, 'upload.html')
 
             # Leitura do Shapefile com a biblioteca GDAL/OGR
             ds = DataSource(shp_file)
@@ -81,9 +83,11 @@ def upload_shapefile(request):
                 EmpreendimentoEolico.objects.create(nome_parque=nome_encontrado, geom=geom)
                 sucesso_count += 1
 
-            return HttpResponse(f"SUCESSO ABSOLUTO! {sucesso_count} parques salvos.")
+            messages.success(request, 'Shapefile importado e processado com sucesso!')
+            return redirect('admin:mapas_empreendimentoeolico_changelist')
         except Exception as e:
-            return HttpResponse(f"Deu erro: {str(e)}")
+            messages.error(request, f"Deu erro: {str(e)}")
+            return render(request, 'upload.html')
         finally:
             # Garante que os arquivos temporários criados sejam apagados
             shutil.rmtree(temp_dir)

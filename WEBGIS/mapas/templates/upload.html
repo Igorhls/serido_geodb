@@ -1,56 +1,95 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Upload de Eólicas</title>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 40px; 
-            background-color: #f4f4f9; 
-        }
-        .container { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 8px; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-            max-width: 500px; 
-        }
-        h2 { 
-            color: #333; 
-        }
-        .btn { 
-            background: #28a745; 
-            color: white; 
-            padding: 10px 15px; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            margin-top: 15px;
-        }
-        .btn:hover { 
-            background: #218838; 
-        }
-        .file-input {
-            margin-top: 15px;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Importar Shapefile | Geobdg</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+  </head>
+  <body>
+    <!-- Cabeçalho padronizado -->
+    <header class="topbar">
+      <a class="brand" href="{% url 'pagina_inicio' %}">Geobdg</a>
+      <nav class="menu" aria-label="Navegação principal">
+        <a href="{% url 'pagina_inicio' %}#banco">Banco de dados</a>
+        <a href="{% url 'pagina_inicio' %}#quem-somos">Quem Somos</a>
+        <a href="{% url 'pagina_inicio' %}#contato">Contato</a>
+        <a href="/admin/">Painel Admin</a>
+      </nav>
+    </header>
+
+    <!-- Contêiner principal para empurrar o rodapé -->
+    <main class="pagina-upload-conteiner">
+      
+      <div class="upload-card">
         <h2>Importar Shapefile de Energia Eólica</h2>
-        <p>Por favor, envie um arquivo <b>.zip</b> contendo os arquivos do shapefile (.shp, .shx, .dbf, .prj).</p>
+        <p>Envie um arquivo compactado (<b>.zip</b>) contendo os arquivos que compõem o Shapefile (como .shp, .shx, .dbf, .prj).</p>
         
+        <!-- Renderização de alertas de erro ou sucesso do Django -->
+        {% if messages %}
+        <div class="alerts-container">
+          {% for message in messages %}
+          <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
+            {{ message.message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <div class="file-input">
-                <input type="file" name="arquivo_zip" accept=".zip" required>
-            </div>
-            
-            <button type="submit" class="btn">Enviar Shapefile</button>
+          {% csrf_token %}
+          
+          <label class="drop-zone" for="arquivo_zip_input">
+            <span class="file-icon">📁</span>
+            <span class="file-text">Arraste seu arquivo ZIP aqui</span>
+            <span class="file-subtext">ou clique para procurar no seu computador</span>
+            <input type="file" id="arquivo_zip_input" name="arquivo_zip" accept=".zip" required hidden>
+          </label>
+          
+          <div class="botoes-acao">
+            <a href="{% url 'admin:mapas_empreendimentoeolico_changelist' %}" class="btn-cancel">Cancelar e Voltar</a>
+            <button type="submit" class="btn-submit">Enviar Shapefile</button>
+          </div>
         </form>
-    </div>
-</body>
+      </div>
+
+    </main>
+
+    <!-- Rodapé padronizado -->
+    <footer class="site-footer">
+      <div class="footer-content">
+        <p class="footer-title">BDG Seridó Renovável - Banco de Dados Geoespacial de Energia Renovável</p>
+        <p class="footer-credits">Fomento e Apoio: CNPq (Edital PIBIC-Af), IFRN e LT2M</p>
+        <p class="footer-github">
+          <a href="https://github.com/Igorhls/serido_geodb" target="_blank" rel="noopener noreferrer">
+            <svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+            Repositório no GitHub
+          </a>
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      // Micro-interação para exibir o nome do arquivo selecionado
+      const fileInput = document.getElementById('arquivo_zip_input');
+      const fileText = document.querySelector('.file-text');
+      const fileSubtext = document.querySelector('.file-subtext');
+
+      fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+          fileText.textContent = e.target.files[0].name;
+          fileSubtext.textContent = "Pronto para enviar!";
+          fileSubtext.style.color = "#49bd83";
+        } else {
+          fileText.textContent = "Arraste seu arquivo ZIP aqui";
+          fileSubtext.textContent = "ou clique para procurar no seu computador";
+          fileSubtext.style.color = "";
+        }
+      });
+    </script>
+  </body>
 </html>

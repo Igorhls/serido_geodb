@@ -101,16 +101,31 @@
         // Foco ajustado exatamente para o Rio Grande do Norte / Seridó!
         var map = L.map('meu-mapa').setView([-6.2, -36.5], 8);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Camadas de fundo (TileLayers)
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
-        }).addTo(map);
+        });
+
+        var satelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+
+        // Adiciona o OpenStreetMap padrão ao mapa
+        osm.addTo(map);
 
         var geojsonData = {{ eolicas_geojson|safe }};
 
-        // Instancia o grupo de marker cluster
-        var markers = L.markerClusterGroup();
+        // Camada 1: Visão Simples (Sem agrupamento, pop-up básico)
+        var visaoSimples = L.geoJSON(geojsonData, {
+            onEachFeature: function (feature, layer) {
+                if (feature.properties && feature.properties.nome_parque) {
+                    layer.bindPopup("<b>Parque Eólico:</b> " + feature.properties.nome_parque);
+                }
+            }
+        });
 
-        var geojsonLayer = L.geoJSON(geojsonData, {
+        // Camada 2: Visão Agrupada (Com marker cluster e pop-ups enriquecidos)
+        var geojsonLayerEnriquecido = L.geoJSON(geojsonData, {
             onEachFeature: function (feature, layer) {
                 if (feature.properties) {
                     var nome = feature.properties.nome_parque || 'Não informado';
@@ -158,9 +173,27 @@
             }
         });
 
-        // Adiciona a camada geojson ao grupo de clusters e o grupo ao mapa
-        markers.addLayer(geojsonLayer);
-        markers.addTo(map);
+        var visaoAgrupada = L.markerClusterGroup();
+        visaoAgrupada.addLayer(geojsonLayerEnriquecido);
+
+        // Adiciona a Visão Agrupada ao mapa por padrão
+        map.addLayer(visaoAgrupada);
+
+        // Controle de Camadas de Fundo (Tiles)
+        var basesDeFundo = {
+            "OpenStreetMap": osm,
+            "Satélite (Esri)": satelite
+        };
+
+        // Controle de Camadas de Dados (Radio buttons para alternância)
+        var mapasBase = {
+            "Visão Agrupada (Nova)": visaoAgrupada,
+            "Visão Simples (Antiga)": visaoSimples
+        };
+
+        // Adiciona os controles ao mapa
+        L.control.layers(basesDeFundo, null, {position: 'topright'}).addTo(map);
+        L.control.layers(mapasBase, null, {collapsed: false, position: 'topright'}).addTo(map);
     </script>
   </body>
 </html>
