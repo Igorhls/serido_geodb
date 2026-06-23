@@ -22,3 +22,20 @@ O objetivo é organizar e disponibilizar gratuitamente dados atualizados e padro
 * **Orientador:** Flánelson Monteiro
 *  **Grupo de Pesquisa:** Processamento Mineral
 * **Instituição:** Instituto Federal de Educação, Ciência e Tecnologia do Rio Grande do Norte (IFRN)
+
+## 💾 Como realizar o Backup do Banco de Dados
+
+Para realizar o backup do banco de dados espacial localizado no Docker de forma simples:
+
+1. Navegue até a pasta do docker-compose:
+   ```bash
+   cd PostGIS
+   ```
+
+2. Execute o script de backup (usando Git Bash, WSL ou Linux):
+   ```bash
+   ./backup_db.sh
+   ```
+
+Os backups serão salvos no formato compactado do PostgreSQL (`.dump`) dentro do diretório `PostGIS/backups/`.
+

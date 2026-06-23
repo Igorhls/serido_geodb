@@ -2,11 +2,13 @@ import os
 import zipfile
 import tempfile
 import shutil
+import json
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.gis.gdal import DataSource
 from django.core.serializers import serialize
 from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.http import require_GET
 from .models import EmpreendimentoEolico
 
 @staff_member_required
@@ -105,7 +107,7 @@ def pagina_inicio(request):
     total_eolicas = eolicas.count()
     
     # Serializa os objetos de parque eólico em GeoJSON com suas geometrias
-    eolicas_geojson = serialize('geojson', eolicas, geometry_field='geom', fields=('nome_parque',))
+    eolicas_geojson = serialize('geojson', eolicas, geometry_field='geom', fields=('nome_parque', 'status_operacional', 'capacidade_mw', 'fonte_dado'))
     
     return render(request, 'inicio.html', {
         'total_eolicas': total_eolicas,
@@ -125,6 +127,12 @@ def pagina_mapa(request):
         HttpResponse: A página HTML 'mapa_interativo.html' renderizada com os dados do mapa.
     """
     eolicas = EmpreendimentoEolico.objects.all()
-    eolicas_geojson = serialize('geojson', eolicas, geometry_field='geom', fields=('nome_parque',))
+    eolicas_geojson = serialize('geojson', eolicas, geometry_field='geom', fields=('nome_parque', 'status_operacional', 'capacidade_mw', 'fonte_dado'))
     
     return render(request, 'mapa_interativo.html', {'eolicas_geojson': eolicas_geojson})
+
+
+def api_eolicas_geojson(request):
+    eolicas = EmpreendimentoEolico.objects.all()
+    geojson_data = serialize('geojson', eolicas, geometry_field='geom')
+    return HttpResponse(geojson_data, content_type='application/json')
