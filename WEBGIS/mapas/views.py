@@ -6,24 +6,40 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.gis.gdal import DataSource
 from django.core.serializers import serialize
+from django.contrib.admin.views.decorators import staff_member_required
 from .models import EmpreendimentoEolico
 
-# 1. FUNÇÃO DE UPLOAD
+@staff_member_required
 def upload_shapefile(request):
+    """
+    Processa o upload de arquivos compactados (.zip) contendo shapefiles,
+    extrai os arquivos espaciais, realiza a leitura da camada vetorial e
+    salva os registros de parques eólicos no banco de dados espacial PostGIS.
+
+    Parâmetros:
+        request (HttpRequest): O objeto de requisição do Django contendo o arquivo ZIP.
+
+    Retorna:
+        HttpResponse: Uma resposta textual indicando o sucesso da operação,
+                      um erro encontrado ou renderizando a página de upload.
+    """
     if request.method == 'POST':
         arquivo_zip = request.FILES.get('arquivo_zip')
         if not arquivo_zip:
             return HttpResponse("Nenhum arquivo enviado.")
 
+        # Criação de um diretório temporário isolado para extração
         temp_dir = tempfile.mkdtemp()
         try:
             zip_path = os.path.join(temp_dir, arquivo_zip.name)
             with open(zip_path, 'wb+') as destination:
                 for chunk in arquivo_zip.chunks():
                     destination.write(chunk)
+            
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(temp_dir)
 
+            # Busca recursiva pelo arquivo .shp principal
             shp_file = None
             for root, dirs, files in os.walk(temp_dir):
                 for file in files:
@@ -36,24 +52,30 @@ def upload_shapefile(request):
             if not shp_file:
                 return HttpResponse("Erro: Não encontrei nenhum arquivo .shp.")
 
+            # Leitura do Shapefile com a biblioteca GDAL/OGR
             ds = DataSource(shp_file)
             layer = ds[0] 
             colunas_shape = layer.fields
             sucesso_count = 0
             
             for feature in layer:
+                # Obtenção da geometria vetorial do elemento
                 geom = feature.geom.geos 
+                
+                # Garantia de sistema de referência espacial UTM 24S (SRID 31984)
                 if geom.srid is None:
                     geom.srid = 31984
                 elif geom.srid != 31984:
                     geom.transform(31984)
 
+                # Mapeamento do nome do parque a partir de colunas comuns
                 nome_encontrado = "Nome Não Identificado"
                 for opcao in ['Nome', 'NOME', 'nome', 'NM_EMPREEN']:
                     if opcao in colunas_shape:
                         nome_encontrado = str(feature.get(opcao))
                         break
 
+                # Persistência do registro espacial no banco de dados
                 EmpreendimentoEolico.objects.create(nome_parque=nome_encontrado, geom=geom)
                 sucesso_count += 1
 
@@ -61,16 +83,28 @@ def upload_shapefile(request):
         except Exception as e:
             return HttpResponse(f"Deu erro: {str(e)}")
         finally:
+            # Garante que os arquivos temporários criados sejam apagados
             shutil.rmtree(temp_dir)
     return render(request, 'upload.html')
 
 
-# 2. FUNÇÃO DA TELA INICIAL
 def pagina_inicio(request):
+    """
+    Renderiza a página inicial do portal, calculando o total de torres
+    eólicas cadastradas e serializando as geometrias em formato GeoJSON
+    para visualização cartográfica interativa.
+
+    Parâmetros:
+        request (HttpRequest): O objeto de requisição do Django.
+
+    Retorna:
+        HttpResponse: A página HTML 'inicio.html' renderizada com o total de eólicas
+                      e os dados em GeoJSON.
+    """
     eolicas = EmpreendimentoEolico.objects.all()
     total_eolicas = eolicas.count()
     
-    # Voltamos para o formato simples que envia os dados corretamente!
+    # Serializa os objetos de parque eólico em GeoJSON com suas geometrias
     eolicas_geojson = serialize('geojson', eolicas, geometry_field='geom', fields=('nome_parque',))
     
     return render(request, 'inicio.html', {
@@ -79,8 +113,17 @@ def pagina_inicio(request):
     })
 
 
-# 3. FUNÇÃO DO MAPA INTERATIVO
 def pagina_mapa(request):
+    """
+    Renderiza a página exclusiva do mapa interativo WebGIS, fornecendo
+    a base de dados espacial de eólicas serializada no formato GeoJSON.
+
+    Parâmetros:
+        request (HttpRequest): O objeto de requisição do Django.
+
+    Retorna:
+        HttpResponse: A página HTML 'mapa_interativo.html' renderizada com os dados do mapa.
+    """
     eolicas = EmpreendimentoEolico.objects.all()
     eolicas_geojson = serialize('geojson', eolicas, geometry_field='geom', fields=('nome_parque',))
     
