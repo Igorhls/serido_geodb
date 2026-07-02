@@ -89,15 +89,85 @@
             color: #f87171;
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
+
+        /* Estatísticas do Banco flutuante */
+        .estatisticas-banco {
+            position: absolute;
+            top: 20px;
+            left: 240px;
+            z-index: 1000;
+            background: rgba(30, 41, 59, 0.9);
+            color: #f8fafc;
+            padding: 10px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-family: 'Manrope', sans-serif;
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            pointer-events: auto;
+        }
+        .estatisticas-banco h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0ea5e9;
+        }
+        .estatisticas-banco small {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        
+        /* Estilo para remover fundo branco padrão do DivIcon */
+        .custom-div-icon {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
     </style>
   </head>
   <body>
     
     <a href="{% url 'pagina_inicio' %}" class="voltar-btn">⬅ Voltar ao Início</a>
     
+    <div class="estatisticas-banco">
+        <h3>Quantidade de Torres: {{ qtd_torres }}</h3>
+        {% if ultima_atualizacao %}
+            <small class="text-muted">
+                Última atualização do banco: {{ ultima_atualizacao|date:"d/m/Y H:i" }}
+            </small>
+        {% endif %}
+    </div>
+    
     <div id="meu-mapa" style="height: 100%; width: 100%;"></div>
 
     <script>
+        // 1. Definição do Ícone de Torre Eólica Customizado (SVG Realista)
+        var eolicaIcon = L.divIcon({
+            html: `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="36" height="36" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.45));">
+              <!-- Torre / Mast -->
+              <path d="M30 60 L31.5 24 L32.5 24 L34 60 Z" fill="#cbd5e1" stroke="#475569" stroke-width="1"/>
+              <!-- Rotor / Centro -->
+              <circle cx="32" cy="24" r="2.5" fill="#f8fafc" stroke="#334155" stroke-width="1"/>
+              <!-- Pás / Blades (Elegantes e realistas) -->
+              <g stroke="#0ea5e9" stroke-width="2.2" stroke-linecap="round" fill="none">
+                <!-- Pá Vertical Superior -->
+                <line x1="32" y1="24" x2="32" y2="4" />
+                <!-- Pá Direita/Baixo -->
+                <line x1="32" y1="24" x2="48" y2="33" />
+                <!-- Pá Esquerda/Baixo -->
+                <line x1="32" y1="24" x2="16" y2="33" />
+              </g>
+            </svg>
+            `,
+            className: 'custom-div-icon',
+            iconSize: [36, 36],
+            iconAnchor: [18, 34],
+            popupAnchor: [0, -34]
+        });
         // Foco ajustado exatamente para o Rio Grande do Norte / Seridó!
         var map = L.map('meu-mapa').setView([-6.2, -36.5], 8);
 
@@ -117,6 +187,9 @@
 
         // Camada 1: Visão Simples (Sem agrupamento, pop-up básico)
         var visaoSimples = L.geoJSON(geojsonData, {
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, { icon: eolicaIcon });
+            },
             onEachFeature: function (feature, layer) {
                 if (feature.properties && feature.properties.nome_parque) {
                     layer.bindPopup("<b>Parque Eólico:</b> " + feature.properties.nome_parque);
@@ -126,13 +199,17 @@
 
         // Camada 2: Visão Agrupada (Com marker cluster e pop-ups enriquecidos)
         var geojsonLayerEnriquecido = L.geoJSON(geojsonData, {
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, { icon: eolicaIcon });
+            },
             onEachFeature: function (feature, layer) {
                 if (feature.properties) {
                     var nome = feature.properties.nome_parque || 'Não informado';
                     var status = feature.properties.status_operacional || 'Não informado';
                     
-                    var cap = feature.properties.capacidade_mw;
-                    var capFormatted = (cap !== undefined && cap !== null) ? parseFloat(cap).toFixed(2) + ' MW' : 'Não informado';
+                    // Captura e formatação das coordenadas da torre
+                    var coords = feature.geometry && feature.geometry.coordinates;
+                    var coordsFormatted = coords ? `${coords[1].toFixed(5)}, ${coords[0].toFixed(5)}` : 'Não informado';
                     
                     var fonte = feature.properties.fonte_dado || 'Não informado';
 
@@ -158,8 +235,8 @@
                                     <span class="popup-val">${statusHtml}</span>
                                 </div>
                                 <div class="popup-item">
-                                    <span class="popup-label">Capacidade:</span>
-                                    <span class="popup-val">${capFormatted}</span>
+                                    <span class="popup-label">Coordenadas:</span>
+                                    <span class="popup-val">${coordsFormatted}</span>
                                 </div>
                                 <div class="popup-item">
                                     <span class="popup-label">Fonte:</span>

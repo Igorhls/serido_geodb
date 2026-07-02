@@ -10,6 +10,7 @@ from django.contrib.gis.gdal import DataSource
 from django.core.serializers import serialize
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_GET
+from django.utils import timezone
 from .models import EmpreendimentoEolico
 
 @staff_member_required
@@ -62,6 +63,21 @@ def upload_shapefile(request):
             colunas_shape = layer.fields
             sucesso_count = 0
             
+            # Carrega a malha de municípios para cruzamento espacial off-line
+            caminho_mun = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'geojson', 'geojs-24-mun.json')
+            municipalities = []
+            try:
+                with open(caminho_mun, 'r', encoding='utf-8') as f:
+                    mun_data = json.load(f)
+                from django.contrib.gis.geos import GEOSGeometry
+                for feature in mun_data['features']:
+                    name = feature['properties']['name']
+                    geom_mun = GEOSGeometry(json.dumps(feature['geometry']))
+                    geom_mun.srid = 4326
+                    municipalities.append({'name': name, 'geom': geom_mun})
+            except Exception as e:
+                pass
+            
             for feature in layer:
                 # Obtenção da geometria vetorial do elemento
                 geom = feature.geom.geos 
@@ -79,8 +95,21 @@ def upload_shapefile(request):
                         nome_encontrado = str(feature.get(opcao))
                         break
 
+                # Cruzamento espacial para obter o município
+                geom_4326 = geom.clone()
+                geom_4326.transform(4326)
+                nome_municipio = None
+                for mun in municipalities:
+                    if mun['geom'].contains(geom_4326):
+                        nome_municipio = mun['name']
+                        break
+
                 # Persistência do registro espacial no banco de dados
-                EmpreendimentoEolico.objects.create(nome_parque=nome_encontrado, geom=geom)
+                EmpreendimentoEolico.objects.create(
+                    nome_parque=nome_encontrado,
+                    municipio=nome_municipio,
+                    geom=geom
+                )
                 sucesso_count += 1
 
             messages.success(request, 'Shapefile importado e processado com sucesso!')
@@ -110,12 +139,17 @@ def pagina_inicio(request):
     eolicas = EmpreendimentoEolico.objects.all()
     total_eolicas = eolicas.count()
     
+    # Busca a última torre inserida para pegar a data de atualização
+    ultima_torre = eolicas.order_by('-id').first()
+    ultima_atualizacao = ultima_torre.data_registro if ultima_torre and hasattr(ultima_torre, 'data_registro') else timezone.now()
+    
     # Serializa os objetos de parque eólico em GeoJSON com suas geometrias
     eolicas_geojson = serialize('geojson', eolicas, geometry_field='geom', fields=('nome_parque', 'status_operacional', 'capacidade_mw', 'fonte_dado'))
     
     return render(request, 'inicio.html', {
         'total_eolicas': total_eolicas,
-        'eolicas_geojson': eolicas_geojson 
+        'eolicas_geojson': eolicas_geojson,
+        'ultima_atualizacao': ultima_atualizacao
     })
 
 
@@ -130,10 +164,21 @@ def pagina_mapa(request):
     Retorna:
         HttpResponse: A página HTML 'mapa_interativo.html' renderizada com os dados do mapa.
     """
-    eolicas = EmpreendimentoEolico.objects.all()
-    eolicas_geojson = serialize('geojson', eolicas, geometry_field='geom', fields=('nome_parque', 'status_operacional', 'capacidade_mw', 'fonte_dado'))
+    torres = EmpreendimentoEolico.objects.all()
+    qtd_torres = torres.count()
     
-    return render(request, 'mapa_interativo.html', {'eolicas_geojson': eolicas_geojson})
+    # Busca a última torre inserida para pegar a data de atualização
+    ultima_torre = torres.order_by('-id').first()
+    ultima_atualizacao = ultima_torre.data_registro if ultima_torre and hasattr(ultima_torre, 'data_registro') else timezone.now()
+    
+    eolicas_geojson = serialize('geojson', torres, geometry_field='geom', fields=('nome_parque', 'status_operacional', 'capacidade_mw', 'fonte_dado'))
+    
+    context = {
+        'eolicas_geojson': eolicas_geojson,
+        'qtd_torres': qtd_torres,
+        'ultima_atualizacao': ultima_atualizacao,
+    }
+    return render(request, 'mapa_interativo.html', context)
 
 
 def api_eolicas_geojson(request):

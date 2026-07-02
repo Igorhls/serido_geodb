@@ -63,9 +63,9 @@
           
           <div id="mapa-ibge" style="height: 560px; width: 100%; z-index: 1;" title="Clique em um município para abrir o WebGIS"></div>
           
-          <div style="margin-top: -15px; font-weight: 800; color: #64748b; font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase; z-index: 2;">
+          <a href="{% url 'pagina_mapa' %}" style="text-decoration: none; cursor: pointer; margin-top: -15px; font-weight: 800; color: #64748b; font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase; z-index: 2; transition: color 0.2s;" onmouseover="this.style.color='#0ea5e9'" onmouseout="this.style.color='#64748b'">
             👆 Clique no mapa para abrir o WebGIS interativo
-          </div>
+          </a>
         </div>
 
         <aside class="stats">
@@ -73,6 +73,11 @@
             <span>Seridó</span>
             <strong>{{ total_eolicas }}</strong>
             <small>torres cadastradas</small>
+            {% if ultima_atualizacao %}
+              <small style="display: block; margin-top: 4px; font-size: 0.72rem; opacity: 0.85; font-weight: normal; color: var(--muted);">
+                Atualizado em: {{ ultima_atualizacao|date:"d/m/Y H:i" }}
+              </small>
+            {% endif %}
           </div>
           <div>
             <span>Municípios</span>
@@ -199,6 +204,29 @@
                     });
                 }
             }).addTo(mapIbge);
+
+            // Destaque Harmonioso da Região do Seridó
+            var estiloSerido = {
+                color: "#f97316",
+                weight: 2,
+                opacity: 0.85,
+                dashArray: "4, 6",
+                fillColor: "#fdba74",
+                fillOpacity: 0.1,
+                interactive: false
+            };
+
+            fetch("{% static 'geojson/limites_serido.geojson' %}")
+                .then(response => {
+                    if (!response.ok) throw new Error("GeoJSON do Seridó não encontrado.");
+                    return response.json();
+                })
+                .then(data => {
+                    L.geoJSON(data, {
+                        style: estiloSerido
+                    }).addTo(mapIbge);
+                })
+                .catch(error => console.log(error));
 
             // 4. Injeta a matemática resolvida no seu contador
             contadorUI.innerHTML = `<span style="color: #0ea5e9;">${municipiosAtivosCount}</span> / 167`;
