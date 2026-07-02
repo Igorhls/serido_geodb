@@ -95,6 +95,20 @@ def upload_shapefile(request):
                         nome_encontrado = str(feature.get(opcao))
                         break
 
+                # Mapeamento do status a partir de colunas comuns
+                status_encontrado = None
+                for opcao in ['Status', 'STATUS', 'status', 'STATUS_OPE', 'status_ope', 'Situação', 'SITUACAO', 'situacao']:
+                    if opcao in colunas_shape:
+                        status_encontrado = str(feature.get(opcao))
+                        break
+
+                # Mapeamento da fonte a partir de colunas comuns
+                fonte_encontrada = None
+                for opcao in ['Fonte', 'FONTE', 'fonte', 'FONTE_DADO', 'fonte_dado', 'Fonte_Dado']:
+                    if opcao in colunas_shape:
+                        fonte_encontrada = str(feature.get(opcao))
+                        break
+
                 # Cruzamento espacial para obter o município
                 geom_4326 = geom.clone()
                 geom_4326.transform(4326)
@@ -108,6 +122,10 @@ def upload_shapefile(request):
                 EmpreendimentoEolico.objects.create(
                     nome_parque=nome_encontrado,
                     municipio=nome_municipio,
+                    status_operacional=status_encontrado,
+                    status=status_encontrado,
+                    fonte_dado=fonte_encontrada,
+                    fonte=fonte_encontrada,
                     geom=geom
                 )
                 sucesso_count += 1
