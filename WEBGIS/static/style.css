@@ -785,4 +785,25 @@ h2 {
   border: 1px solid rgba(255, 111, 97, 0.25);
 }
 
+/* --- ESTILOS DA LOGO GEOBDG --- */
+.logo-geobdg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1.5rem;
+  color: #334155 !important;
+  letter-spacing: -0.02em;
+}
+.logo-geobdg span { font-weight: 500; }
+.logo-geobdg strong { font-weight: 800; color: #0ea5e9; }
+.logo-helice {
+  transform-origin: 25px 20px;
+  animation: spinLogo 15s linear infinite;
+  transition: animation-duration 0.3s ease;
+}
+.logo-geobdg:hover .logo-helice { animation-duration: 2.5s; }
+@keyframes spinLogo { 100% { transform: rotate(360deg); } }
+
 

@@ -118,7 +118,24 @@
   <body>
     <!-- Cabeçalho padronizado -->
     <header class="topbar">
-      <a class="brand" href="{% url 'pagina_inicio' %}">Geobdg</a>
+      <a class="brand logo-geobdg" href="{% url 'pagina_inicio' %}">
+        <svg width="32" height="32" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+          <!-- Pino do Mapa (Azul) -->
+          <path d="M25,2 A18,18 0 0,0 7,20 C7,35 25,48 25,48 C25,48 43,35 43,20 A18,18 0 0,0 25,2 Z" fill="#0ea5e9" />
+          <!-- Fundo Vazado -->
+          <circle cx="25" cy="20" r="12" fill="#ffffff" />
+          <!-- Hélices Eólicas Animadas (Laranja) -->
+          <g class="logo-helice" fill="#f97316">
+            <path d="M24.2,20 L23,10 A2,2 0 0,1 27,10 L25.8,20 Z" />
+            <path d="M24.2,20 L23,10 A2,2 0 0,1 27,10 L25.8,20 Z" transform="rotate(120 25 20)" />
+            <path d="M24.2,20 L23,10 A2,2 0 0,1 27,10 L25.8,20 Z" transform="rotate(240 25 20)" />
+          </g>
+          <!-- Eixo Central do Motor -->
+          <circle cx="25" cy="20" r="3.5" fill="#eab308" />
+          <circle cx="25" cy="20" r="1.5" fill="#334155" />
+        </svg>
+        <span>Geo<strong>BDG</strong></span>
+      </a>
       <nav class="menu" aria-label="Navegação principal">
         <a href="{% url 'pagina_inicio' %}#banco">Banco de dados</a>
         <a href="{% url 'pagina_inicio' %}#quem-somos">Quem Somos</a>
