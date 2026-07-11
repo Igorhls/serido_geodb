@@ -806,4 +806,9 @@ h2 {
 .logo-geobdg:hover .logo-helice { animation-duration: 2.5s; }
 @keyframes spinLogo { 100% { transform: rotate(360deg); } }
 
+/* Oculta o quadrado conic-gradient da marca antiga no novo logo */
+.logo-geobdg::before {
+  display: none !important;
+}
+
 

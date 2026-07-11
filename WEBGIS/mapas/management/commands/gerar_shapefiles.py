@@ -41,8 +41,8 @@ class Command(BaseCommand):
                     shp.record(
                         torre.nome_parque or '',
                         torre.municipio or '',
-                        torre.fonte or '',
-                        torre.status or ''
+                        torre.fonte or torre.fonte_dado or '',
+                        torre.status or torre.status_operacional or ''
                     )
 
         with open(f"{caminho_base_todos}.prj", "w", encoding='utf-8') as prj:
@@ -83,8 +83,8 @@ class Command(BaseCommand):
                         shp.record(
                             torre.nome_parque or '',
                             torre.municipio or '',
-                            torre.fonte or '',
-                            torre.status or ''
+                            torre.fonte or torre.fonte_dado or '',
+                            torre.status or torre.status_operacional or ''
                         )
 
             # Criação do .prj
