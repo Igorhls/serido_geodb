@@ -159,8 +159,8 @@ def pagina_inicio(request):
     total_eolicas = eolicas.count()
     
     # Busca a última torre inserida para pegar a data de atualização
-    ultima_torre = eolicas.order_by('-id').first()
-    ultima_atualizacao = ultima_torre.data_registro if ultima_torre and hasattr(ultima_torre, 'data_registro') else timezone.now()
+    ultima_torre = eolicas.order_by('-atualizado_em').first()
+    ultima_atualizacao = ultima_torre.atualizado_em if ultima_torre else None
     
     # Serializa os objetos de parque eólico em GeoJSON com suas geometrias
     eolicas_geojson = serialize('geojson', eolicas, geometry_field='geom', fields=('nome_parque', 'status_operacional', 'capacidade_mw', 'fonte_dado'))
@@ -187,8 +187,8 @@ def pagina_mapa(request):
     qtd_torres = torres.count()
     
     # Busca a última torre inserida para pegar a data de atualização
-    ultima_torre = torres.order_by('-id').first()
-    ultima_atualizacao = ultima_torre.data_registro if ultima_torre and hasattr(ultima_torre, 'data_registro') else timezone.now()
+    ultima_torre = torres.order_by('-atualizado_em').first()
+    ultima_atualizacao = ultima_torre.atualizado_em if ultima_torre else None
     
     eolicas_geojson = serialize('geojson', torres, geometry_field='geom', fields=('nome_parque', 'status_operacional', 'capacidade_mw', 'fonte_dado'))
     
@@ -217,8 +217,11 @@ def lista_downloads(request):
     if os.path.exists(diretorio_downloads):
         for arquivo in os.listdir(diretorio_downloads):
             if arquivo.endswith('.zip'):
-                # Formata o nome do arquivo para exibição (ex: torres_currais_novos.zip -> Currais Novos)
-                nome_exibicao = arquivo.replace('torres_', '').replace('.zip', '').replace('_', ' ').title()
+                if '00_todos_os_municipios' in arquivo:
+                    nome_exibicao = "🌟 TODOS OS DADOS (Estado Completo)"
+                else:
+                    # Formata o nome do arquivo para exibição (ex: torres_currais_novos.zip -> Currais Novos)
+                    nome_exibicao = arquivo.replace('torres_', '').replace('.zip', '').replace('_', ' ').title()
                 
                 arquivos_disponiveis.append({
                     'arquivo_nome': arquivo,
@@ -226,7 +229,7 @@ def lista_downloads(request):
                     'url': f"{settings.MEDIA_URL}downloads/{arquivo}"
                 })
                 
-    # Ordena a lista alfabeticamente pelo nome do município
-    arquivos_disponiveis = sorted(arquivos_disponiveis, key=lambda x: x['municipio'])
+    # Ordena a lista alfabeticamente pelo nome do arquivo (para o prefixo 00_ ficar no topo)
+    arquivos_disponiveis = sorted(arquivos_disponiveis, key=lambda x: x['arquivo_nome'])
     
     return render(request, 'mapas/downloads.html', {'downloads': arquivos_disponiveis})

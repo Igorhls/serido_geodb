@@ -15,6 +15,9 @@ class EmpreendimentoEolico(models.Model):
     
     # O campo mágico espacial! (Ponto com SRC UTM 24S)
     geom = models.PointField(srid=31984, spatial_index=True, verbose_name='Geometria')
+    
+    # Campo de rastreamento de data de modificação
+    atualizado_em = models.DateTimeField(auto_now=True, null=True, verbose_name='Última Atualização')
 
     class Meta:
         verbose_name = 'Empreendimento Eólico'
