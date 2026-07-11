@@ -6,4 +6,5 @@ urlpatterns = [
     path('', views.pagina_inicio, name='pagina_inicio'),       # <-- Rota da Tela Inicial
     path('mapa/', views.pagina_mapa, name='pagina_mapa'),      # <-- Rota do Mapa WebGIS
     path('api/eolicas/', views.api_eolicas_geojson, name='api_eolicas'),
+    path('downloads/', views.lista_downloads, name='lista_downloads'),
 ]

@@ -12,6 +12,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_GET
 from django.utils import timezone
 from .models import EmpreendimentoEolico
+from django.conf import settings
 
 @staff_member_required
 def upload_shapefile(request):
@@ -203,3 +204,29 @@ def api_eolicas_geojson(request):
     eolicas = EmpreendimentoEolico.objects.all()
     geojson_data = serialize('geojson', eolicas, geometry_field='geom')
     return HttpResponse(geojson_data, content_type='application/json')
+
+
+def lista_downloads(request):
+    """
+    View responsável por escanear o diretório de mídias e listar 
+    todos os pacotes Shapefile compactados disponíveis para download.
+    """
+    diretorio_downloads = os.path.join(settings.MEDIA_ROOT, 'downloads')
+    arquivos_disponiveis = []
+    
+    if os.path.exists(diretorio_downloads):
+        for arquivo in os.listdir(diretorio_downloads):
+            if arquivo.endswith('.zip'):
+                # Formata o nome do arquivo para exibição (ex: torres_currais_novos.zip -> Currais Novos)
+                nome_exibicao = arquivo.replace('torres_', '').replace('.zip', '').replace('_', ' ').title()
+                
+                arquivos_disponiveis.append({
+                    'arquivo_nome': arquivo,
+                    'municipio': nome_exibicao,
+                    'url': f"{settings.MEDIA_URL}downloads/{arquivo}"
+                })
+                
+    # Ordena a lista alfabeticamente pelo nome do município
+    arquivos_disponiveis = sorted(arquivos_disponiveis, key=lambda x: x['municipio'])
+    
+    return render(request, 'mapas/downloads.html', {'downloads': arquivos_disponiveis})

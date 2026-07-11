@@ -1,0 +1,180 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Download de Dados Vetoriais | Geobdg</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+      .downloads-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-top: 24px;
+      }
+      
+      @media(min-width: 640px) {
+        .downloads-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .download-item {
+        background: #ffffff;
+        border: 1px solid rgba(16, 37, 54, 0.08);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(16, 37, 54, 0.03);
+      }
+
+      .download-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(16, 37, 54, 0.08);
+        border-color: rgba(16, 196, 223, 0.4);
+      }
+
+      .download-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .download-icon {
+        font-size: 1.8rem;
+        background: rgba(16, 196, 223, 0.1);
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        color: var(--cyan);
+        flex-shrink: 0;
+      }
+
+      .download-details {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .download-details strong {
+        font-family: "Sora", sans-serif;
+        font-size: 1.05rem;
+        color: var(--ink);
+      }
+
+      .download-details span {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      .btn-download {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--blue), var(--cyan));
+        color: #ffffff;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 10px rgba(25, 103, 210, 0.2);
+      }
+
+      .btn-download:hover {
+        filter: brightness(1.05);
+        box-shadow: 0 6px 15px rgba(25, 103, 210, 0.35);
+        transform: scale(1.02);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        color: var(--muted);
+      }
+
+      .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Cabeçalho padronizado -->
+    <header class="topbar">
+      <a class="brand" href="{% url 'pagina_inicio' %}">Geobdg</a>
+      <nav class="menu" aria-label="Navegação principal">
+        <a href="{% url 'pagina_inicio' %}#banco">Banco de dados</a>
+        <a href="{% url 'pagina_inicio' %}#quem-somos">Quem Somos</a>
+        <a href="{% url 'pagina_inicio' %}#contato">Contato</a>
+        <a href="{% url 'pagina_mapa' %}">Mapa WebGIS</a>
+        <a href="/admin/">Painel Admin</a>
+      </nav>
+    </header>
+
+    <!-- Contêiner principal -->
+    <main class="pagina-upload-conteiner">
+      <div class="upload-card" style="max-width: 800px;">
+        <h2>Download de Dados Vetoriais por Município</h2>
+        <p>Selecione o município desejado para baixar o pacote Shapefile (.zip) contendo as geometrias (pontos) e a tabela de atributos das torres eólicas atualizadas no sistema de referência <b>SIRGAS 2000 / UTM Zone 24S (EPSG: 31984)</b>.</p>
+
+        {% if downloads %}
+          <div class="downloads-grid">
+            {% for item in downloads %}
+              <div class="download-item">
+                <div class="download-info">
+                  <div class="download-icon">📥</div>
+                  <div class="download-details">
+                    <strong>{{ item.municipio }}</strong>
+                    <span>Shapefile ZIP (.shp, .shx, .dbf, .prj)</span>
+                  </div>
+                </div>
+                <a href="{{ item.url }}" class="btn-download" download>
+                  Baixar Pacote
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <span class="empty-state-icon">🗂️</span>
+            <p>Nenhum pacote de dados foi pré-gerado no servidor ainda.</p>
+            <p style="font-size: 0.85rem; margin-top: 8px;">Execute o comando <code>python manage.py gerar_shapefiles</code> no servidor para gerar os pacotes.</p>
+          </div>
+        {% endif %}
+      </div>
+    </main>
+
+    <!-- Rodapé padronizado -->
+    <footer class="site-footer">
+      <div class="footer-content">
+        <p class="footer-title">BDG Seridó Renovável - Banco de Dados Geoespacial de Energia Renovável</p>
+        <p class="footer-credits">Fomento e Apoio: CNPq (Edital PIBIC-Af), IFRN e LT2M</p>
+        <p class="footer-github">
+          <a href="https://github.com/Igorhls/serido_geodb" target="_blank" rel="noopener noreferrer">
+            <svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+            Repositório no GitHub
+          </a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
