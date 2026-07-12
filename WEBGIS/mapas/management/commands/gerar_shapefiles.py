@@ -35,14 +35,37 @@ class Command(BaseCommand):
             shp.field('MUNICIPIO', 'C', 50)
             shp.field('FONTE', 'C', 100)
             shp.field('STATUS', 'C', 50)
+            shp.field('CNPJ', 'C', 20)
+            shp.field('OUTORGADO', 'C', 150)
+            shp.field('GRUPO_CONT', 'C', 150)
+            shp.field('COD_IBGE', 'C', 20)
+            shp.field('LATITUDE', 'N', 18, 8)
+            shp.field('LONGITUDE', 'N', 18, 8)
             for torre in torres_todas:
                 if torre.geom:
                     shp.point(torre.geom.x, torre.geom.y)
+                    
+                    # Extração defensiva (adapte aos nomes reais do models.py)
+                    cnpj = getattr(torre, 'cnpj', '')
+                    outorgado = getattr(torre, 'outorgado', '')
+                    grupo = getattr(torre, 'grupo_controlador', getattr(torre, 'grupo', ''))
+                    cod_ibge = getattr(torre, 'codigo_municipio', getattr(torre, 'cod_ibge', ''))
+                    
+                    # Extração das coordenadas do PointField do GeoDjango
+                    lat = torre.geom.y
+                    lon = torre.geom.x
+
                     shp.record(
-                        torre.nome_parque or '',
+                        getattr(torre, 'nome_parque', getattr(torre, 'nome', '')) or '',
                         torre.municipio or '',
-                        torre.fonte or torre.fonte_dado or '',
-                        torre.status or torre.status_operacional or ''
+                        torre.fonte or getattr(torre, 'fonte_dado', '') or '',
+                        torre.status or getattr(torre, 'status_operacional', '') or '',
+                        cnpj or '',
+                        outorgado or '',
+                        grupo or '',
+                        cod_ibge or '',
+                        lat,
+                        lon
                     )
 
         with open(f"{caminho_base_todos}.prj", "w", encoding='utf-8') as prj:
@@ -74,17 +97,40 @@ class Command(BaseCommand):
                 shp.field('MUNICIPIO', 'C', 50)
                 shp.field('FONTE', 'C', 100)
                 shp.field('STATUS', 'C', 50)
+                shp.field('CNPJ', 'C', 20)
+                shp.field('OUTORGADO', 'C', 150)
+                shp.field('GRUPO_CONT', 'C', 150)
+                shp.field('COD_IBGE', 'C', 20)
+                shp.field('LATITUDE', 'N', 18, 8)
+                shp.field('LONGITUDE', 'N', 18, 8)
 
                 torres = EmpreendimentoEolico.objects.filter(municipio=municipio)
 
                 for torre in torres:
                     if torre.geom:
                         shp.point(torre.geom.x, torre.geom.y)
+                        
+                        # Extração defensiva (adapte aos nomes reais do models.py)
+                        cnpj = getattr(torre, 'cnpj', '')
+                        outorgado = getattr(torre, 'outorgado', '')
+                        grupo = getattr(torre, 'grupo_controlador', getattr(torre, 'grupo', ''))
+                        cod_ibge = getattr(torre, 'codigo_municipio', getattr(torre, 'cod_ibge', ''))
+                        
+                        # Extração das coordenadas do PointField do GeoDjango
+                        lat = torre.geom.y
+                        lon = torre.geom.x
+
                         shp.record(
-                            torre.nome_parque or '',
+                            getattr(torre, 'nome_parque', getattr(torre, 'nome', '')) or '',
                             torre.municipio or '',
-                            torre.fonte or torre.fonte_dado or '',
-                            torre.status or torre.status_operacional or ''
+                            torre.fonte or getattr(torre, 'fonte_dado', '') or '',
+                            torre.status or getattr(torre, 'status_operacional', '') or '',
+                            cnpj or '',
+                            outorgado or '',
+                            grupo or '',
+                            cod_ibge or '',
+                            lat,
+                            lon
                         )
 
             # Criação do .prj
