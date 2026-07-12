@@ -959,4 +959,27 @@ h2 {
   display: none !important;
 }
 
+/* --- ESTILOS DE ANO DO RODAPÉ --- */
+.footer-year {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+/* --- DESTAQUE DE DOWNLOAD COMPLETO --- */
+.download-completo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.download-item-completo {
+  max-width: 550px;
+  width: 100%;
+  border: 2px solid rgba(16, 196, 223, 0.4) !important;
+  background: rgba(16, 196, 223, 0.03) !important;
+}
+
 
