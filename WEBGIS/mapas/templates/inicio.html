@@ -132,10 +132,35 @@
         </div>
       </section>
       <section id="quem-somos" class="about-section">
-        <p class="eyebrow">Quem Somos</p>
-        <h2>Pesquisa, Vetorização e Análise Socioambiental</h2>
-        <p>Somos estudantes e pesquisadores do <strong>Instituto Federal do Rio Grande do Norte (IFRN)</strong>, vinculados ao <strong>Laboratório de Tecnologia Mineral e Materiais (LT2M)</strong>. O nosso projeto teve como foco principal a criação de um banco de dados georreferenciado, desenvolvido a partir da vetorização das torres eólicas localizadas na região do Seridó Potiguar.</p>
-        <p style="margin-top: 15px;">Um dos nossos grandes objetivos é democratizar o acesso a essas informações. Para isso, criamos este site utilizando geotecnologias (WebGIS), oferecendo uma ferramenta voltada para a análise socioambiental e a gestão espacial dos parques eólicos da região.</p>
+        <div class="about-container">
+          
+          <!-- Coluna da Esquerda: Textos -->
+          <div class="about-text">
+            <p class="eyebrow">Quem Somos</p>
+            <h2>Pesquisa, Vetorização e Análise Socioambiental</h2>
+            <p>Somos estudantes e pesquisadores do <strong>Instituto Federal do Rio Grande do Norte (IFRN)</strong>, vinculados ao <strong>Laboratório de Tecnologia Mineral e Materiais (LT2M)</strong>. O nosso projeto teve como foco principal a criação de um banco de dados georreferenciado, desenvolvido a partir da vetorização das torres eólicas localizadas na região do Seridó Potiguar.</p>
+            <p style="margin-top: 15px;">Um dos nossos grandes objetivos é democratizar o acesso a essas informações. Para isso, criamos este site <strong>Geobdg</strong> utilizando geotecnologias (WebGIS), oferecendo uma ferramenta voltada para a análise socioambiental e a gestão espacial dos parques eólicos da região.</p>
+          </div>
+
+          <!-- Coluna da Direita: Logos -->
+          <div class="about-sidebar">
+            <div class="institutions">
+              <h3>Apoio e Realização</h3>
+              <div class="logos-grid">
+                <a href="https://portal.ifrn.edu.br/" target="_blank" title="Acessar site do IFRN">
+                  <img src="{% static 'img/logo-ifrn.png' %}" alt="Logo IFRN">
+                </a>
+                <a href="https://www.gov.br/cnpq/pt-br" target="_blank" title="Acessar site do CNPq">
+                  <img src="{% static 'img/logo-cnpq.png' %}" alt="Logo CNPq">
+                </a>
+                <a href="https://www.instagram.com/lt2m.ifrn/" target="_blank" title="Acessar Instagram do LT2M">
+                  <img src="{% static 'img/logo-lt2m.png' %}" alt="Logo LT2M">
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </section>      <p></p>
     </main>
 
@@ -143,6 +168,42 @@
       <div class="footer-content">
         <p class="footer-title">BDG Seridó Renovável - Banco de Dados Geoespacial de Energia Renovável</p>
         <p class="footer-credits">Fomento e Apoio: CNPq (Edital PIBIC-Af), IFRN e LT2M</p>
+        
+        <div class="footer-team">
+          <strong>Equipe de Pesquisa</strong>
+          <div class="footer-team-members">
+            <div class="footer-member">
+              <a href="http://lattes.cnpq.br/3922364664438253" target="_blank" class="lattes-link">
+                <svg class="lattes-icon-svg" viewBox="0 0 24 24" width="14" height="14">
+                  <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5.89 12.55L12 15.88l6.11-3.33c.36.98.56 2.03.56 3.12 0 3.31-2.69 6-6 6s-6-2.69-6-6c0-1.09.2-2.14.56-3.12z" fill="currentColor"/>
+                </svg>Igor Henrique
+              </a>
+              <span class="member-role">Pesquisador / Dev WebGIS</span>
+            </div>
+            
+            <div class="footer-member">
+              <a href="https://lattes.cnpq.br/7191932824994596" target="_blank" class="lattes-link">
+                <svg class="lattes-icon-svg" viewBox="0 0 24 24" width="14" height="14">
+                  <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5.89 12.55L12 15.88l6.11-3.33c.36.98.56 2.03.56 3.12 0 3.31-2.69 6-6 6s-6-2.69-6-6c0-1.09.2-2.14.56-3.12z" fill="currentColor"/>
+                </svg>Maria Luiza
+              </a>
+              <span class="member-role">Pesquisadora / Geoprocessamento</span>
+            </div>
+            
+            <div class="footer-member">
+              <a href="http://lattes.cnpq.br/2694008433207932" target="_blank" class="lattes-link">
+                <svg class="lattes-icon-svg" viewBox="0 0 24 24" width="14" height="14">
+                  <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5.89 12.55L12 15.88l6.11-3.33c.36.98.56 2.03.56 3.12 0 3.31-2.69 6-6 6s-6-2.69-6-6c0-1.09.2-2.14.56-3.12z" fill="currentColor"/>
+                </svg>Flánelson Monteiro
+              </a>
+              <span class="member-role">Professor Orientador</span>
+            </div>
+          </div>
+        </div>
+
+
+
+
         <p class="footer-github">
           <a href="https://github.com/Igorhls/serido_geodb" target="_blank" rel="noopener noreferrer">
             <svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">

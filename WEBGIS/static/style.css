@@ -508,16 +508,159 @@ h2 {
 }
 
 .about-section {
-  max-width: 1080px;
+  max-width: none; /* Ocupa a largura total da página assim como os outros blocos */
   background:
     linear-gradient(135deg, rgba(124, 92, 255, 0.09), transparent 46%),
     var(--paper);
 }
 
 .about-section p {
-  max-width: 66ch;
+  max-width: 100%; /* Ocupa toda a metade esquerda da página sem compactar */
   font-size: 1.09rem;
 }
+
+/* --- LAYOUT DUAS COLUNAS: QUEM SOMOS --- */
+.about-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+@media (max-width: 992px) {
+  .about-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+/* --- BARRA LATERAL: LOGOS --- */
+.about-sidebar h3 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 15px;
+  font-weight: 700;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+  text-align: center;
+}
+
+.logos-grid {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: center; /* Centralizar os placeholders com a linha superior */
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.logos-grid a img {
+  height: 80px;
+  max-width: 100%;
+  object-fit: contain;
+  opacity: 0.88;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logos-grid a:hover img {
+  opacity: 1;
+  transform: translateY(-6px) scale(1.06);
+  filter: drop-shadow(0 12px 20px rgba(15, 23, 42, 0.08));
+}
+
+/* --- PLACEHOLDERS DE LOGOS --- */
+.logo-placeholder-link {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 85px;  /* Maiores, conforme solicitado */
+  width: 160px;  /* Ocupando a outra metade de forma robusta */
+  background: #ffffff;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: #64748b;
+  text-transform: uppercase;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.logo-placeholder-link:hover .logo-placeholder {
+  border-color: #0ea5e9;
+  color: #0ea5e9;
+  background: #f0f9ff;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.1), 0 4px 6px -4px rgba(14, 165, 233, 0.1);
+}
+
+/* --- RODAPÉ: EQUIPE DE PESQUISA --- */
+.footer-team {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 25px 0 20px;
+  line-height: 1.6;
+}
+
+.footer-team strong {
+  display: block;
+  color: #ffffff;
+  font-family: "Sora", "Manrope", Arial, sans-serif;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.footer-team-members {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.footer-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.footer-team a {
+  color: #10c4df;
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.92rem;
+}
+
+.footer-team a:hover {
+  color: #8fe6c8;
+}
+
+.member-role {
+  font-size: 0.76rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.lattes-icon-svg {
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentColor;
+  margin-top: -1px;
+}
+
+
 
 .contact-section {
   border-top: 1px solid var(--line);
